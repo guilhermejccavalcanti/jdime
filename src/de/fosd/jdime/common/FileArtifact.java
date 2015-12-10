@@ -24,6 +24,7 @@
 package de.fosd.jdime.common;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -34,10 +35,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.activation.MimetypesFileTypeMap;
 
 import de.fosd.jdime.common.operations.MergeOperation;
@@ -49,6 +52,8 @@ import de.fosd.jdime.stats.MergeScenarioStatistics;
 import de.fosd.jdime.stats.StatisticsInterface;
 import de.fosd.jdime.strategy.DirectoryStrategy;
 import de.fosd.jdime.strategy.MergeStrategy;
+import de.fosd.jdime.strategy.StructuredStrategy;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
@@ -655,6 +660,9 @@ public class FileArtifact extends Artifact<FileArtifact> {
         
         if (!context.isQuiet() && context.hasOutput()) {
             System.out.print(context.getStdIn());
+
+            //FPFN
+			printJDimeConflictsNumbers(context.getStdIn());
         }
         context.resetStreams();
     }
@@ -727,4 +735,58 @@ public class FileArtifact extends Artifact<FileArtifact> {
             return "";
         }
     }
+    
+	//FPFN
+	private void printJDimeConflictsNumbers(String fileContent) {
+		int jdimeLOC   = 0;
+		int jdimeConfs = 0;
+		int jdimeFiles = 0;
+
+		String CONFLICT_HEADER_BEGIN= "<<<<<<<";
+		String CONFLICT_HEADER_END 	= ">>>>>>>";
+
+		boolean isConflictOpen		= false;
+		boolean isConflictingFile	= false;
+
+		Scanner scanner = new Scanner(fileContent);
+		while (scanner.hasNextLine()) {
+			String line = scanner.nextLine();
+			if(!line.contains("//") && !line.contains("/*") && line.contains(CONFLICT_HEADER_END)) {
+				isConflictOpen	= false;
+			}
+			if(isConflictOpen){
+				jdimeLOC++;
+			}
+			if(!line.contains("//") && !line.contains("/*") && line.contains(CONFLICT_HEADER_BEGIN)){
+				isConflictingFile = true;
+				isConflictOpen = true;
+				jdimeConfs++;
+			} 
+		}
+		scanner.close();
+		if(isConflictingFile){
+			jdimeFiles++;
+		}
+		
+		StructuredStrategy.ASTBranchesResult.CONFS	+= jdimeConfs;
+		StructuredStrategy.ASTBranchesResult.LOCS	+= jdimeLOC;
+		StructuredStrategy.ASTBranchesResult.FILES	+= jdimeFiles;
+
+		try {
+			File file = new File("results/temp_jdime_conflicts_report.csv" );
+			if(!file.exists()){
+				file.createNewFile();
+			}
+
+			FileWriter fw;
+			fw = new FileWriter(file, true);
+			BufferedWriter bw = new BufferedWriter( fw );
+			bw.write(jdimeConfs+";"+jdimeLOC+";"+jdimeFiles);
+			bw.newLine();
+			bw.close();
+			fw.close();		
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

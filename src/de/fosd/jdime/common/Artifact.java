@@ -22,6 +22,7 @@
  */
 package de.fosd.jdime.common;
 
+
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -855,5 +856,15 @@ public abstract class Artifact<T extends Artifact<T>> implements Comparable<T>, 
      */
     public HashMap<String, T> getVariants() {
         return variants;
-    }
+    }    //FPFN
+	
+    public LinkedHashMap<Revision, Matching<T>> getMatches() {
+		return matches;
+	}
+
+	//FPFN
+	public void setMatches(LinkedHashMap<Revision, Matching<T>> matches) {
+		this.matches = matches;
+	}
+    
 }

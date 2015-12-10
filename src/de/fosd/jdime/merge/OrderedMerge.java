@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.fosd.jdime.common.ASTNodeArtifact;
 import de.fosd.jdime.common.Artifact;
 import de.fosd.jdime.common.MergeContext;
 import de.fosd.jdime.common.MergeScenario;
@@ -37,6 +38,7 @@ import de.fosd.jdime.common.operations.ConflictOperation;
 import de.fosd.jdime.common.operations.DeleteOperation;
 import de.fosd.jdime.common.operations.MergeOperation;
 import de.fosd.jdime.matcher.Matching;
+import de.fosd.jdime.strategy.StructuredStrategy;
 
 /**
  * @author Olaf Lessenich
@@ -130,7 +132,12 @@ public class OrderedMerge<T extends Artifact<T>> implements MergeInterface<T> {
                         } else {
                             leftdone = true;
                         }
-                    } else {
+                    } else {//SE O OUTRO NÃO ME TEM, MAS A BASE TEM, E EU NÃO MUDEI, ENTÃO ME APAGARAM
+						//FPFN
+						if(leftChild instanceof ASTNodeArtifact){
+							StructuredStrategy.ASTBranchesResult.buildASTResultFromLeft(((ASTNodeArtifact)leftChild));
+						}	
+						
                         // can be safely deleted
                         DeleteOperation<T> delOp = new DeleteOperation<>(leftChild, target, triple, l.getName());
                         delOp.apply(context);
@@ -164,7 +171,12 @@ public class OrderedMerge<T extends Artifact<T>> implements MergeInterface<T> {
                                 } else {
                                     leftdone = true;
                                 }
-                            } else {
+                            } else {//SE NENHUM DOIS ME TEM, EU NÃO TENHO O OUTRO MAS BASE TEM, E O OUTRO NÃO MUDOU, É UMA ADIÇÃO
+								//FPFN
+								if(leftChild instanceof ASTNodeArtifact){
+									StructuredStrategy.ASTBranchesResult.buildASTResultFromLeft(((ASTNodeArtifact)leftChild));
+								}	
+								
                                 // add the left change
                                 AddOperation<T> addOp = new AddOperation<>(leftChild, target, triple, l.getName());
                                 leftChild.setMerged();
@@ -184,7 +196,12 @@ public class OrderedMerge<T extends Artifact<T>> implements MergeInterface<T> {
                                 rightdone = true;
                             }
                         }
-                    } else {
+                    } else {//SE NENHUM DOS DOIS ME TEM, MAS EU TENHO O OUTRO, ENTÃO É UMA ADIÇÃO 
+						//FPFN
+						if(leftChild instanceof ASTNodeArtifact){
+							StructuredStrategy.ASTBranchesResult.buildASTResultFromLeft(((ASTNodeArtifact)leftChild));
+						}
+                    	
                         LOG.finest(() -> String.format("%s adding change", prefix(finalLeftChild)));
 
                         // add the left change
@@ -230,6 +247,11 @@ public class OrderedMerge<T extends Artifact<T>> implements MergeInterface<T> {
                             leftdone = true;
                         }
                     } else {
+                    	//FPFN
+						if(rightChild instanceof ASTNodeArtifact){
+							StructuredStrategy.ASTBranchesResult.buildASTResultFromRight(((ASTNodeArtifact)rightChild));
+						}	
+						
                         // can be safely deleted
                         DeleteOperation<T> delOp = new DeleteOperation<>(rightChild, target, triple, r.getName());
                         delOp.apply(context);
@@ -263,6 +285,11 @@ public class OrderedMerge<T extends Artifact<T>> implements MergeInterface<T> {
                                     leftdone = true;
                                 }
                             } else {
+                            	//FPFN
+								if(rightChild instanceof ASTNodeArtifact){
+									StructuredStrategy.ASTBranchesResult.buildASTResultFromRight(((ASTNodeArtifact)rightChild));
+								}	
+								
                                 LOG.finest(() -> String.format("%s adding change", prefix(finalRightChild)));
 
                                 // add the right change
@@ -285,7 +312,12 @@ public class OrderedMerge<T extends Artifact<T>> implements MergeInterface<T> {
                             }
                         }
                     } else {
-                        LOG.finest(() -> String.format("%s adding change", prefix(finalRightChild)));
+						//FPFN
+						if(rightChild instanceof ASTNodeArtifact){
+							StructuredStrategy.ASTBranchesResult.buildASTResultFromRight(((ASTNodeArtifact)rightChild));
+						}	
+						
+                    	LOG.finest(() -> String.format("%s adding change", prefix(finalRightChild)));
 
                         // add the right change
                         AddOperation<T> addOp = new AddOperation<>(rightChild, target, triple, r.getName());

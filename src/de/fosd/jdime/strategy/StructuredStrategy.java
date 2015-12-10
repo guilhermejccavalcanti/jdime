@@ -26,9 +26,12 @@ package de.fosd.jdime.strategy;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.Permission;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import util.ASTBranchComparator;
 import de.fosd.jdime.common.ASTNodeArtifact;
 import de.fosd.jdime.common.FileArtifact;
 import de.fosd.jdime.common.MergeContext;
@@ -135,6 +138,10 @@ public class StructuredStrategy extends MergeStrategy<FileArtifact> {
             astMergeOp.apply(context);
             targetNode.setRevision(MergeScenario.TARGET, true); // TODO do this somewhere else?
 
+            //FPFN
+			ASTBranchComparator comparator = new ASTBranchComparator();
+			StructuredStrategy.ASTBranchesResult.EDITIONS_TO_DIFFERENT_PARTS_OF_SAME_STMT += comparator.countEditionsToDifferentPartsOfSameStmt(base.getRevision(), StructuredStrategy.ASTBranchesResult.getBranchesFromLeft(), StructuredStrategy.ASTBranchesResult.getBranchesFromRight());
+            
             long runtime = System.currentTimeMillis() - startTime;
 
             LOG.fine("Structured merge finished.");
@@ -226,4 +233,53 @@ public class StructuredStrategy extends MergeStrategy<FileArtifact> {
             System.setSecurityManager(systemSecurityManager);
         }
     }
+    
+    /**
+	 * FPFN
+	 * Stores the parents nodes of givens AST.Node
+	 * @author Guilherme
+	 *
+	 */
+	public static class ASTBranchesResult {
+
+		//ATTRIBUTES EDITED FOR EACH MERGED FILE
+		private static ArrayList<ArrayList<ASTNodeArtifact>> branchesFromLeft 			= new ArrayList<ArrayList<ASTNodeArtifact>>();
+		private static ArrayList<ArrayList<ASTNodeArtifact>> branchesFromRight 			= new ArrayList<ArrayList<ASTNodeArtifact>>();	
+		public static int EDITIONS_TO_DIFFERENT_PARTS_OF_SAME_STMT 						= 0;
+		public static ArrayList<String> LOG_EDITIONS_TO_DIFFERENT_PARTS_OF_SAME_STMT 	= new ArrayList<String>();
+		public static int CONFS 	= 0;
+		public static int LOCS 		= 0;
+		public static int FILES 	= 0;
+
+		public static void buildASTResultFromLeft(ASTNodeArtifact node){
+			ArrayList<ASTNodeArtifact> leftParents = new ArrayList<ASTNodeArtifact>();
+			build(node, leftParents);
+			Collections.reverse(leftParents);
+			branchesFromLeft.add(leftParents);
+		}
+
+		public static void buildASTResultFromRight(ASTNodeArtifact node){
+			ArrayList<ASTNodeArtifact> rightParents = new ArrayList<ASTNodeArtifact>();
+			build(node, rightParents);
+			Collections.reverse(rightParents);
+			branchesFromRight.add(rightParents);
+		}
+
+		private static void build(ASTNodeArtifact node, ArrayList<ASTNodeArtifact> parents){
+			if(null == node.getParent()){
+				return;
+			} else {
+				parents.add(node.getParent());
+				build(node.getParent(),parents);
+			}
+		}
+
+		public static ArrayList<ArrayList<ASTNodeArtifact>> getBranchesFromLeft(){
+			return branchesFromLeft;
+		}
+
+		public static ArrayList<ArrayList<ASTNodeArtifact>> getBranchesFromRight(){
+			return branchesFromRight;
+		}
+	}
 }
