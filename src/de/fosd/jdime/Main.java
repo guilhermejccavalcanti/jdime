@@ -78,10 +78,17 @@ public final class Main {
 	 * @param args command line arguments
 	 */
 	public static void main(final String[] args) throws IOException, ParseException, InterruptedException {
+		
 		String[] command = {"-mode", "structured", "-output", 
-				"C:/GGTS/workspace/jdime/examples/left/left.java", 
-				"C:/GGTS/workspace/jdime/examples/base/base.java", 
-				"C:/GGTS/workspace/jdime/examples/right/right.java"};
+				"C:\\Users\\Guilherme\\Desktop\\error2\\left.java", 
+				"C:\\Users\\Guilherme\\Desktop\\error2\\base.java", 
+				"C:\\Users\\Guilherme\\Desktop\\error2\\right.java", 
+				};
+		
+		//		String[] command = {"-mode", "structured", "-output", 
+		//				"C:/GGTS/workspace/jdime/examples/left/left.java", 
+		//				"C:/GGTS/workspace/jdime/examples/base/base.java", 
+		//				"C:/GGTS/workspace/jdime/examples/right/right.java"};
 
 		//		String[] command = {"-mode", "structured", "-output","C:/GGTS/ggts-bundle/workspace/jdime/examples/output/", "-r",
 		//				 "C:/GGTS/ggts-bundle/workspace/jdime/examples/left/", 
@@ -246,7 +253,7 @@ public final class Main {
 
 		//System.exit(0);
 	}
-	
+
 	/**
 	 * Outputs the given <code>Statistics</code> according to the set configuration options.
 	 *

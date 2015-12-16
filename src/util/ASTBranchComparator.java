@@ -3,6 +3,7 @@ package util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.jastadd.extendj.ast.Stmt;
@@ -107,8 +108,16 @@ public class ASTBranchComparator {
 						lastEqualStmt 		= deeperEqualNode;
 						lastEqualStmtLeft 	= leftBranch.get(index);
 						lastEqualStmtRight 	= rightBranch.get(index);
-						AUXlastEqualStmtLeftSubBranch  = leftBranch.subList(index+1, leftBranch.size()-1);
-						AUXlastEqualStmtRightSubBranch = rightBranch.subList(index+1, rightBranch.size()-1);
+						try{
+							AUXlastEqualStmtLeftSubBranch  = leftBranch.subList(index+1, leftBranch.size()-1);
+						} catch(IllegalArgumentException e){
+							AUXlastEqualStmtLeftSubBranch = new LinkedList<ASTNodeArtifact>();
+						}
+						try{
+							AUXlastEqualStmtRightSubBranch = rightBranch.subList(index+1, rightBranch.size()-1);
+						} catch(IllegalArgumentException e){
+							AUXlastEqualStmtLeftSubBranch = new LinkedList<ASTNodeArtifact>();
+						}
 					}
 				}
 				index++;
@@ -145,7 +154,6 @@ public class ASTBranchComparator {
 		}
 		return false;
 	}
-
 
 	private ArrayList<ASTNodeArtifact> printCommonBranch(ASTNodeArtifact deeperEqualNode){
 		return rebuildAST(deeperEqualNode);
